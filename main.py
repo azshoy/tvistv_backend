@@ -76,7 +76,7 @@ def get_content_with_id(iid):
 
 
 
-@app.route('/content/<iid>', methods=['POST', 'PATCH', 'DELETE'])
+@app.route('/edit-content/<iid>', methods=['POST', 'PATCH', 'DELETE'])
 @basic_auth.required
 def edit_contents_param(iid):
     data = request.json
@@ -84,7 +84,7 @@ def edit_contents_param(iid):
         return edit_content_with_id(iid, data, request.method)
     return "Error"
 
-@app.route('/content', methods=['POST', 'PATCH', 'DELETE'])
+@app.route('/edit-content', methods=['POST', 'PATCH', 'DELETE'])
 @basic_auth.required
 def edit_contents():
     data = request.json
@@ -192,7 +192,7 @@ def get_image_with_id(iid):
     return jsonify(Image.get(id=iid).as_a_dict())
 
 
-@app.route('/image', methods=['POST', 'PATCH', 'DELETE'])
+@app.route('/edit-image', methods=['POST', 'PATCH', 'DELETE'])
 @basic_auth.required
 def edit_images():
     data = request.json
@@ -202,7 +202,7 @@ def edit_images():
     else:
         return edit_image_with_id(None, data, request.method)
 
-@app.route('/image/<iid>', methods=['PATCH', 'DELETE'])
+@app.route('/edit-image/<iid>', methods=['PATCH', 'DELETE'])
 @basic_auth.required
 def edit_image(iid):
     data = request.json
@@ -252,7 +252,7 @@ def get_keyvalues():
 
 
 
-@app.route('/keyvalue/<key>', methods=['POST', 'PATCH', 'DELETE'])
+@app.route('/edit-keyvalue/<key>', methods=['POST', 'PATCH', 'DELETE'])
 @basic_auth.required
 def edit_keyvalue(key):
     data = request.json
@@ -267,7 +267,7 @@ def edit_keyvalue(key):
     return "Error"
 
 
-@app.route('/keyvalue', methods=['POST', 'PATCH', 'DELETE'])
+@app.route('/edit-keyvalue', methods=['POST', 'PATCH', 'DELETE'])
 @basic_auth.required
 def edit_keyvalues():
     data = request.json
