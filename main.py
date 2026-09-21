@@ -221,6 +221,9 @@ def edit_image(iid):
 
 def edit_image_with_id(iid, data, method):
     author = "unknown"
+    if isinstance(iid, str):
+        if iid.isdigit():
+            iid = int(iid)
     if "author" in data:
         author = data["author"]
     if method == 'POST':
