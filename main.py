@@ -137,7 +137,7 @@ def edit_content_with_id(iid, data, method):
             if not obj.exists():
                 obj = BoxIframe.select().where(BoxIframe.id==iid)
             if obj.exists():
-                obj.get().delete()
+                obj.get().delete_instance()
                 return jsonify({"message": "Deleted!"}), 200
             return error_response("notfound", "No such object")
     return error_response("end")
@@ -240,7 +240,7 @@ def edit_image_with_id(iid, data, method):
         if iid:
             obj = Image.get_or_none(id=iid)
             if obj:
-                obj.delete()
+                obj.delete_instance()
                 return jsonify({"message": "Deleted!"}), 200
             return error_response("notfound", "No such object")
     return error_response("end")
@@ -317,7 +317,7 @@ def edit_parsed_keyvalue(key, value, author, method):
         if method == 'DELETE':
             obj = KeyValue.get_or_none(key=key)
             if obj:
-                obj.delete()
+                obj.delete_instance()
                 return jsonify({"message": "Deleted!"}), 200
 
             return error_response("notfound", "No such object")
