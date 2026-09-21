@@ -181,11 +181,11 @@ def get_random_image():
 
 @app.route('/image', methods=['GET'])
 def get_images():
-    data = request.json
-    if data and "id" in data:
-        return get_image_with_id(data["id"])
-    else:
-        return jsonify(as_a_dict(Image.get()))
+    imgs = Image.select()
+    if imgs.exists():
+        return jsonify(as_a_dict(list(imgs)))
+    return error_response("notfound")
+
 
 
 @app.route('/image/<iid>', methods=['GET'])
