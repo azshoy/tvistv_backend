@@ -152,10 +152,15 @@ def get_random_image():
     aged_images = []
     oldest = 0
     for image in images:
-        age = (now - image.modified).hours
+        age = (now - image.modified).seconds / (60*60)
         if age > oldest:
             oldest = age
         aged_images.append({"age": age, "image": image})
+        boost = 128
+        while age < boost and boost > 1:
+            aged_images.append({"age": age, "image": image})
+            boost = boost/2
+
     total_weight = 0
     for ai in aged_images:
         ai["weight"] = (oldest+10-ai["age"])/(oldest+1)
