@@ -170,14 +170,15 @@ def key_value_type_by_value_type(value):
     return None
 
 def create_new_key_value(key, value, author="unknown"):
-    if KeyValue.select().where(key==key).exists():
-        return None
+    if KeyValue.get_or_none(key=key):
+        return False
     if datetime_valid(value):
         value = datetime.datetime.fromisoformat(value)
     v_type = key_value_type_by_value_type(value)
     if v_type:
-        return KeyValue.create(key=key, value=str(value), value_type=v_type, created_by=author)
-    return None
+        KeyValue.create(key=key, value=str(value), value_type=v_type, created_by=author)
+        return True
+    return False
 
 def update_key_value(key, value, author="unknown"):
     if datetime_valid(value):
@@ -186,8 +187,14 @@ def update_key_value(key, value, author="unknown"):
     if not author:
         author = "unknown"
     if v_type:
-        KeyValue.update({KeyValue.value: str(value), KeyValue.value_type: v_type, KeyValue.modified_by: author, KeyValue.modified: datetime.datetime.now()}).where(KeyValue.key == key)
-        return KeyValue.get(KeyValue.key == key)
+        kv = KeyValue.get_or_none(key=key)
+        if kv:
+            kv.value = str(value)
+            kv.value_type = v_type
+            kv.modified_by = author
+            kv.modified = datetime.datetime.now()
+            kv.save()
+            return kv
     return None
 
 
