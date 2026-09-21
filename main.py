@@ -53,7 +53,7 @@ def get_content_param(iid):
     data = request.json
     if iid:
         return edit_content_with_id(iid, data, request.method)
-    return "Error"
+    return error_response("notfound")
 
 
 def content_exists(iid):
@@ -71,7 +71,7 @@ def get_content_with_id(iid):
     ex, obj, t = content_exists(iid)
     if ex:
         return jsonify(obj.get().as_a_dict())
-    return "Error"
+    return error_response("notfound")
 
 
 
@@ -82,7 +82,7 @@ def edit_contents_param(iid):
     data = request.json
     if iid:
         return edit_content_with_id(iid, data, request.method)
-    return "Error"
+    return error_response("end")
 
 @app.route('/edit-content', methods=['POST', 'PATCH', 'DELETE'])
 @basic_auth.required
@@ -102,26 +102,25 @@ def edit_content_with_id(iid, data, method):
             if ("type" in data and data["type"] == "iframe") or "url" in data:
                 ret = BoxIframe.select().where(BoxText.id==iid)
                 if ret.exists():
-                    return "error: already exists"
+                    return error_response("exists")
                 obj = BoxIframe.create(id=iid)
                 if obj:
                     obj.update_with_dict(data, True)
                 ret = BoxIframe.select().where(BoxIframe.id==iid)
                 if ret.exists():
                     return jsonify(ret.get().as_a_dict())
-                return "error. Could not create"
+                return error_response()
             elif ("type" in data and data["type"] == "text") or "text" in data:
                 ret = BoxText.select().where(BoxText.id==iid)
                 if ret.exists():
-                    return "error: already exists"
+                    return error_response("exists")
                 obj = BoxText.create(id=iid)
                 if obj:
                     obj.update_with_dict(data, True)
                 ret = BoxText.select().where(BoxText.id==iid)
                 if ret.exists():
                     return jsonify(ret.get().as_a_dict())
-                return "error. Could not create"
-            return "error"
+            return error_response()
     if method == 'PATCH':
         if data and iid:
             obj = BoxText.select().where(BoxText.id==iid)
@@ -131,21 +130,21 @@ def edit_content_with_id(iid, data, method):
                 ret = obj.get()
                 ret.update_with_dict(data)
                 return jsonify(ret.as_a_dict())
-        return "No such object"
+            return error_response("notfound", "No such object")
     if method == 'DELETE':
         if iid:
             obj = BoxContent.select().where(BoxContent.id==id)
             if obj.exists():
                 obj.get().delete()
-                return "ok"
-            return "No such object"
-    return "Error"
+                return jsonify({"message": "Deleted!"}), 200
+            return error_response("notfound", "No such object")
+    return error_response("end")
 
 @app.route('/random-image', methods=['GET'])
 def get_random_image():
     images = list(Image.select().where(Image.hidden == False))
     if len(images) == 0:
-        return jsonify({})
+        return error_response("notfound")
     if len(images) == 1:
         return jsonify(images[0].as_a_dict())
     now = datetime.datetime.now()
@@ -171,7 +170,7 @@ def get_random_image():
         cursor += ai["weight"]
         if cursor > r:
             return jsonify(ai["image"].as_a_dict())
-    return jsonify({})
+    return error_response("end")
 
 
 
@@ -191,10 +190,13 @@ def get_images():
 def get_image_param(iid):
     if iid:
         return get_image_with_id(iid)
-    return "Error"
+    return error_response("end")
 
 def get_image_with_id(iid):
-    return jsonify(Image.get(id=iid).as_a_dict())
+    img = Image.get_or_none(id=iid)
+    if img:
+        return jsonify(img.as_a_dict())
+    return error_response("notfound", "No such object")
 
 
 @app.route('/edit-image', methods=['POST', 'PATCH', 'DELETE'])
@@ -213,7 +215,7 @@ def edit_image(iid):
     data = request.json
     if iid:
         return edit_image_with_id(iid, data, request.method)
-    return "Error"
+    return error_response("end")
 
 def edit_image_with_id(iid, data, method):
     author = "unknown"
@@ -226,33 +228,40 @@ def edit_image_with_id(iid, data, method):
                 return jsonify(img.as_a_dict())
     if method == 'PATCH':
         if data and iid:
-            obj = Image.get(id=iid)
+            obj = Image.get_or_none(id=iid)
             if obj:
                 obj.update_with_dict(data)
                 return jsonify(obj.as_a_dict())
-        return "No such object"
+            return error_response("notfound", "No such object")
+        return error_response("notfound", "No such object")
     if method == 'DELETE':
         if iid:
-            obj = Image.get(id=iid)
+            obj = Image.get_or_none(id=iid)
             if obj:
                 obj.delete()
-                return "ok"
-    return "Error"
+                return jsonify({"message": "Deleted!"}), 200
+            return error_response("notfound", "No such object")
+    return error_response("end")
 
 
 @app.route('/keyvalue/<key>', methods=['GET'])
 def get_keyvalue(key):
     if key:
-        obj = KeyValue.get(key=key)
+        obj = KeyValue.get_or_none(key=key)
         if obj:
             return jsonify(obj.as_a_dict())
-    return "Error"
+        return error_response("notfound", "No such object")
+    return error_response("end")
 
 @app.route('/keyvalue', methods=['GET'])
 def get_keyvalues():
     data = request.json
     if data and "key" in data:
-        return jsonify(KeyValue.get(key=data["key"]).as_a_dict())
+        kv = KeyValue.get_or_none(key=data["key"])
+        if kv:
+            return jsonify(kv.as_a_dict())
+        return error_response("notfound", "No such object")
+
     return jsonify(key_values_as_a_dict())
 
 
@@ -269,7 +278,7 @@ def edit_keyvalue(key):
         if "author" in data:
             author = data["author"]
         return edit_parsed_keyvalue(key, value, author, request.method)
-    return "Error"
+    return error_response("end")
 
 
 @app.route('/edit-keyvalue', methods=['POST', 'PATCH', 'DELETE'])
@@ -284,7 +293,7 @@ def edit_keyvalues():
         if "author" in data:
             author = data["author"]
         return edit_parsed_keyvalue(data["key"], value, author, request.method)
-    return "Error"
+    return error_response("end")
 
 def edit_parsed_keyvalue(key, value, author, method):
     if key:
@@ -300,9 +309,10 @@ def edit_parsed_keyvalue(key, value, author, method):
             obj = KeyValue.get(key=key)
             if obj:
                 obj.delete()
-                return "ok"
-            return "No such object"
-    return "Error"
+                return jsonify({"message": "Deleted!"}), 200
+
+            return error_response("notfound", "No such object")
+    return error_response("end")
 
 
 
@@ -315,6 +325,25 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
+def error_response(e="?", msg=""):
+    code = 418
+    error = {"error": "Unknown error"}
+    if msg != "":
+        error["message"] = msg
+
+    if e == "notfound":
+        error["error"] = "Not found"
+        code = 404
+    if e == "exists":
+        error["error"] = "Already exists"
+        code = 400
+    if e == "end":
+        error["error"] = "Could not execute"
+        code = 409
+
+
+    return jsonify(error), code
 
 
 if __name__ == '__main__':
