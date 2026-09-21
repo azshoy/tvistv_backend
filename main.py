@@ -133,7 +133,9 @@ def edit_content_with_id(iid, data, method):
             return error_response("notfound", "No such object")
     if method == 'DELETE':
         if iid:
-            obj = BoxContent.select().where(BoxContent.id==id)
+            obj = BoxText.select().where(BoxText.id==iid)
+            if not obj.exists():
+                obj = BoxIframe.select().where(BoxIframe.id==iid)
             if obj.exists():
                 obj.get().delete()
                 return jsonify({"message": "Deleted!"}), 200
