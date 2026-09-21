@@ -299,14 +299,21 @@ def edit_parsed_keyvalue(key, value, author, method):
     if key:
         if method == 'POST':
             if value:
-                return jsonify(create_new_key_value(key, value, author))
+
+                if KeyValue.get_or_none(key=key):
+                    return error_response("exists")
+                r = create_new_key_value(key, value, author)
+                if r:
+                    kv = KeyValue.get_or_none(key=key)
+                    if kv:
+                        return jsonify(kv.as_a_dict())
         if method == 'PATCH':
             if value:
                 res = update_key_value(key, value, author)
                 if res:
                     return jsonify(res.as_a_dict())
         if method == 'DELETE':
-            obj = KeyValue.get(key=key)
+            obj = KeyValue.get_or_none(key=key)
             if obj:
                 obj.delete()
                 return jsonify({"message": "Deleted!"}), 200
