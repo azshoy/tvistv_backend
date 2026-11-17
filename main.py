@@ -211,7 +211,7 @@ def edit_images():
     else:
         return edit_image_with_id(None, data, request.method)
 
-@app.route('/edit-image/<iid>', methods=['PATCH', 'DELETE'])
+@app.route('/edit-image/<iid>', methods=['POST', 'PATCH', 'DELETE'])
 @basic_auth.required
 def edit_image(iid):
     data = request.json
@@ -227,9 +227,10 @@ def edit_image_with_id(iid, data, method):
     if "author" in data:
         author = data["author"]
     if method == 'POST':
-        if data and "url" in data:
-            img = Image.create(url=data["url"], created_by=author)
+        if data and "url" in data and iid:
+            img = Image.create(id=iid, url=data["url"], created_by=author)
             if img:
+                img.save_as_file(data["url"])
                 return jsonify(img.as_a_dict())
     if method == 'PATCH':
         if data and iid:
