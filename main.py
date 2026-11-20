@@ -230,8 +230,11 @@ def edit_image_with_id(iid, data, method):
         if data and "url" in data and iid:
             img = Image.create(id=iid, url=data["url"], created_by=author)
             if img:
-                img.save_as_file(data["url"])
-                return jsonify(img.as_a_dict())
+                url_get = img.save_as_file(data["url"])
+                if url_get:
+                    return jsonify(img.as_a_dict())
+                img.delete_instance()
+                return error_response("notfound", "Could not load image")
     if method == 'PATCH':
         if data and iid:
             obj = Image.get_or_none(id=iid)

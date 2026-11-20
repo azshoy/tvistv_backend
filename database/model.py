@@ -52,7 +52,7 @@ class Image(BaseModel):
         if url == None:
             url = self.url
         if url.startswith(image_save_path):
-            return
+            return True
         response = requests.get(str(url))
         if response:
             if response.status_code == 200:
@@ -66,6 +66,8 @@ class Image(BaseModel):
                             f.write(response.content)
                         self.url = new_url
                         self.save()
+                        return True
+        return False
 
     def as_a_dict(self):
         return {
