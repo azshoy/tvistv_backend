@@ -1,10 +1,12 @@
 import datetime
 
+import requests
+
 from .db import db
 from peewee import Model, CharField, IntegerField, BooleanField, DateTimeField, ForeignKeyField, FloatField
 
 
-
+image_save_path = "../tvistv_images/"
 
 class BaseModel(Model):
     class Meta:
@@ -46,6 +48,24 @@ class Image(BaseModel):
     id = IntegerField(primary_key=True)
     url = CharField()
     hidden = BooleanField(default=False)
+    def save_as_file(self, url=None):
+        if url == None:
+            url = self.url
+        if url.startswith(image_save_path):
+            return
+        response = requests.get(str(url))
+        if response["success"]:
+            h = response.headers
+            if "Content-Type" in h and response.content:
+                ct = h['Content-Type'].split("/")
+                if len(ct) == 2 and ct[0] == "image":
+                    ext = ct[1]
+                    new_url = image_save_path + 'img_' + str(self.id) + '.' + ext
+                    with open(new_url, 'wb') as f:
+                        f.write(response.content)
+                    self.url = new_url
+                    self.save()
+
     def as_a_dict(self):
         return {
             "id": self.id,
@@ -54,8 +74,10 @@ class Image(BaseModel):
             **self.defaults_dict()
         }
     def update_with_dict(self, data, is_new=False, _non_updatable_keys=None):
-        return super(Image, self).update_with_dict(data, is_new, ["url"])
-
+        updated = super(Image, self).update_with_dict(data, is_new, ["url"])
+        if "url" in data:
+            self.save_as_file(data["url"])
+        return
 
 class TextBoxContainer(BaseModel):
     id = CharField(primary_key=True)
