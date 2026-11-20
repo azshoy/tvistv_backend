@@ -126,6 +126,11 @@ def edit_content_with_id(iid, data, method):
             obj = BoxText.select().where(BoxText.id==iid)
             if not obj.exists():
                 obj = BoxIframe.select().where(BoxIframe.id==iid)
+            if not obj.exists():
+                if isinstance(iid, str) and iid.isdigit():
+                    obj = BoxText.select().where(BoxText.id==int(iid))
+                if not obj.exists():
+                    obj = BoxIframe.select().where(BoxIframe.id==int(iid))
             if obj.exists():
                 ret = obj.get()
                 ret.update_with_dict(data)
@@ -136,6 +141,11 @@ def edit_content_with_id(iid, data, method):
             obj = BoxText.select().where(BoxText.id==iid)
             if not obj.exists():
                 obj = BoxIframe.select().where(BoxIframe.id==iid)
+            if not obj.exists():
+                if isinstance(iid, str) and iid.isdigit():
+                    obj = BoxText.select().where(BoxText.id==int(iid))
+                if not obj.exists():
+                    obj = BoxIframe.select().where(BoxIframe.id==int(iid))
             if obj.exists():
                 obj.get().delete_instance()
                 return jsonify({"message": "Deleted!"}), 200
@@ -238,6 +248,9 @@ def edit_image_with_id(iid, data, method):
     if method == 'PATCH':
         if data and iid:
             obj = Image.get_or_none(id=iid)
+            if not obj:
+                if isinstance(iid, str) and iid.isdigit():
+                    obj = Image.get_or_none(id=int(iid))
             if obj:
                 obj.update_with_dict(data)
                 return jsonify(obj.as_a_dict())
@@ -246,6 +259,9 @@ def edit_image_with_id(iid, data, method):
     if method == 'DELETE':
         if iid:
             obj = Image.get_or_none(id=iid)
+            if not obj:
+                if isinstance(iid, str) and iid.isdigit():
+                    obj = Image.get_or_none(id=int(iid))
             if obj:
                 obj.delete_instance()
                 return jsonify({"message": "Deleted!"}), 200

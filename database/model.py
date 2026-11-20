@@ -6,7 +6,7 @@ from .db import db
 from peewee import Model, CharField, IntegerField, BooleanField, DateTimeField, ForeignKeyField, FloatField
 
 
-image_save_path = "~/files/tvistv_img/"
+image_save_path = "../../files/tvistv_img/"
 
 class BaseModel(Model):
     class Meta:
