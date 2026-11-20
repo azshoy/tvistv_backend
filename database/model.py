@@ -62,7 +62,7 @@ class Image(BaseModel):
                     if len(ct) == 2 and ct[0] == "image":
                         ext = ct[1]
                         new_url = image_save_path + 'img_' + str(self.id) + '.' + ext
-                        with open(new_url, 'wb') as f:
+                        with open(new_url, 'wb+') as f:
                             f.write(response.content)
                         self.url = new_url
                         self.save()
