@@ -97,6 +97,8 @@ def edit_contents():
 
 
 def edit_content_with_id(iid, data, method):
+    if isinstance(iid, int):
+        iid = str(iid)
     if method == 'POST':
         if data and iid and ("type" in data or "text" in data or "url" in data) and "box" in data:
             if ("type" in data and data["type"] == "iframe") or "url" in data:
