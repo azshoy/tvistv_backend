@@ -139,6 +139,7 @@ def edit_content_with_id(iid, data, method):
     if method == 'DELETE':
         if iid:
             obj = BoxText.select().where(BoxText.id==iid)
+            print(f'deleting content: {iid}')
             if not obj.exists():
                 obj = BoxIframe.select().where(BoxIframe.id==iid)
             if not obj.exists():
@@ -148,7 +149,9 @@ def edit_content_with_id(iid, data, method):
                     obj = BoxIframe.select().where(BoxIframe.id==int(iid))
             if obj.exists():
                 obj.get().delete_instance()
+                print(f'Deleted!')
                 return jsonify({"message": "Deleted!"}), 200
+            print(f'Error!')
             return error_response("notfound", "No such object")
     return error_response("end")
 
@@ -258,13 +261,18 @@ def edit_image_with_id(iid, data, method):
         return error_response("notfound", "No such object")
     if method == 'DELETE':
         if iid:
+            print(f'deleting image: {iid}')
+            if isinstance(iid, str) and iid.isdigit():
+                print("id is digit..")
             obj = Image.get_or_none(id=iid)
             if not obj:
                 if isinstance(iid, str) and iid.isdigit():
                     obj = Image.get_or_none(id=int(iid))
             if obj:
                 obj.delete_instance()
+                print("deleted!")
                 return jsonify({"message": "Deleted!"}), 200
+            print("ERROR")
             return error_response("notfound", "No such object")
     return error_response("end")
 
