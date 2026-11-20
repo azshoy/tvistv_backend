@@ -54,17 +54,18 @@ class Image(BaseModel):
         if url.startswith(image_save_path):
             return
         response = requests.get(str(url))
-        if response["success"]:
-            h = response.headers
-            if "Content-Type" in h and response.content:
-                ct = h['Content-Type'].split("/")
-                if len(ct) == 2 and ct[0] == "image":
-                    ext = ct[1]
-                    new_url = image_save_path + 'img_' + str(self.id) + '.' + ext
-                    with open(new_url, 'wb') as f:
-                        f.write(response.content)
-                    self.url = new_url
-                    self.save()
+        if response:
+            if response.status_code == 200:
+                h = response.headers
+                if "Content-Type" in h and response.content:
+                    ct = h['Content-Type'].split("/")
+                    if len(ct) == 2 and ct[0] == "image":
+                        ext = ct[1]
+                        new_url = image_save_path + 'img_' + str(self.id) + '.' + ext
+                        with open(new_url, 'wb') as f:
+                            f.write(response.content)
+                        self.url = new_url
+                        self.save()
 
     def as_a_dict(self):
         return {
